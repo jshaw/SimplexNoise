@@ -1,2 +1,2 @@
 # SimplexNoise
-Arduino class for Simplex Noise
+Arduino Library for SimplexNoise
