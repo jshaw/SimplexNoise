@@ -15,6 +15,9 @@ Version 2012-04-12
 The original Java code was placed in the public domain by its original author,
 Stefan Gustavson. You may use it as you see fit,
 but attribution is appreciated.
+
+Original gist url: https://gist.github.com/Slipyx/2372043
+
 ===============================================================================
 */
 
