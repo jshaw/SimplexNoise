@@ -28,7 +28,7 @@ Original gist url: https://gist.github.com/Slipyx/2372043
 // Private static member definitions
 const double SimplexNoise::F2 = 0.5 * (sqrt( 3.0 ) - 1.0);
 const double SimplexNoise::G2 = (3.0 - sqrt( 3.0 )) / 6.0;
-const uint8_t SimplexNoise::p[256] = {
+static const uint8_t p[256] PROGMEM = {
     151,160,137,91,90,15,131,13,201,95,96,53,194,233,7,225,140,36,103,30,69,
     142,8,99,37,240,21,10,23,190,6,148,247,120,234,75,0,26,197,62,94,252,219,
     203,117,35,11,32,57,177,33,88,237,149,56,87,174,20,125,136,171,168,68,175,
@@ -54,10 +54,9 @@ uint8_t SimplexNoise::permMod12[512] = {0};
 // Initialize permutaion arrays
 void SimplexNoise::init() {
     for ( uint16_t i = 0; i < 512; ++i ) {
-        perm[i] = p[i & 255];
+        perm[i] = pgm_read_byte(p + (i & 255));
         permMod12[i] = static_cast<uint8_t>(perm[i] % 12);
     }
-    delete[] &p; // lol what
 }
 
 // Fast floor
