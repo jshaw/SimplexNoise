@@ -6,7 +6,9 @@ SimplexServo myservo;
 
 // Configuration parameters
 unsigned long previousMillis = 0;
+unsigned long seedChangeMillis = 0;
 const long interval = 50;
+const long seedChangeInterval = 10000;  // Change seed every 10 seconds
 
 // Platform-specific pins
 #ifdef ESP32
@@ -32,7 +34,7 @@ float persistence = 0.5;      // How much each layer contributes (0-1)
 void setup() {
   Serial.begin(115200);
   
-  // Initialize the servo (works on all platforms)
+  // Initialize the servo
   myservo.attach(servoPin);
   
   // Generate proper random seed from analog noise
@@ -45,6 +47,7 @@ void setup() {
   Serial.println("----------------------------");
   Serial.println("Servo pin: " + String(servoPin));
   Serial.println("Interval: " + String(interval) + "ms");
+  Serial.println("Seed change interval: " + String(seedChangeInterval) + "ms");
   Serial.println("Increment: " + String(increase));
   Serial.println("Servo range: " + String(minAngle) + "-" + String(maxAngle));
   
@@ -58,6 +61,21 @@ void setup() {
 void loop() {
   unsigned long currentMillis = millis();
   
+  // Check if it's time to change the seed
+  if (currentMillis - seedChangeMillis >= seedChangeInterval) {
+    seedChangeMillis = currentMillis;
+    
+    // Generate a new random seed
+    uint32_t newSeed = random(100000);
+    SimplexNoise::reseed(newSeed);
+    
+    // Reset position in noise field
+    x = 0.0;
+    
+    Serial.println("Seed changed to: " + String(newSeed));
+  }
+  
+  // Generate noise at regular intervals
   if (currentMillis - previousMillis >= interval) {
     previousMillis = currentMillis;
     
@@ -73,7 +91,7 @@ void loop() {
     // Move through the noise field
     x += increase;
     
-    // Apply to servo (cross-platform)
+    // Apply to servo
     myservo.write(pos);
     
     // Print position for debugging

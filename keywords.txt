@@ -6,21 +6,29 @@
 # Datatypes (KEYWORD1)
 #######################################
 
-F2	KEYWORD1
-G2	KEYWORD1
-perm	KEYWORD1
-permMod12	KEYWORD1
+SimplexNoise	KEYWORD1
+SimplexServo	KEYWORD1
+Grad	KEYWORD1
 
 #######################################
 # Methods and Functions (KEYWORD2)
 #######################################
 
 init	KEYWORD2
+reseed	KEYWORD2
+noise	KEYWORD2
+scaledNoise	KEYWORD2
+fbm	KEYWORD2
+scaledFbm	KEYWORD2
+mapNoise	KEYWORD2
 fastFloor	KEYWORD2
 dot	KEYWORD2
-noise	KEYWORD2
-
+attach	KEYWORD2
+write	KEYWORD2
 
 #######################################
 # Constants (LITERAL1)
 #######################################
+
+F2	LITERAL1
+G2	LITERAL1
