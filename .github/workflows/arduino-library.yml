@@ -1,0 +1,49 @@
+name: Arduino Library
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: arduino/arduino-lint-action@v2
+        with:
+          compliance: strict
+
+  compile-examples:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        fqbn:
+          - arduino:avr:uno
+          - esp32:esp32:esp32
+          - teensy:avr:teensy41
+    steps:
+      - uses: actions/checkout@v4
+      - uses: arduino/setup-arduino-cli@v2
+      - name: Configure package indexes
+        run: |
+          arduino-cli config init --overwrite
+          arduino-cli config add board_manager.additional_urls https://raw.githubusercontent.com/espressif/arduino-esp32/gh-pages/package_esp32_index.json
+          arduino-cli config add board_manager.additional_urls https://www.pjrc.com/teensy/package_teensy_index.json
+      - name: Install cores
+        run: |
+          arduino-cli core update-index
+          arduino-cli core install arduino:avr
+          arduino-cli core install esp32:esp32
+          arduino-cli core install teensy:avr
+      - name: Install dependencies
+        run: |
+          arduino-cli lib install Servo
+          arduino-cli lib install ESP32Servo
+          arduino-cli lib install PWMServo
+      - name: Compile examples
+        run: |
+          for sketch in examples/*/*.ino; do
+            arduino-cli compile --library . --fqbn "${{ matrix.fqbn }}" "$sketch"
+          done

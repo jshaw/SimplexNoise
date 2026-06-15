@@ -14,7 +14,14 @@ Part of the SimplexNoise library
 #define SIMPLEX_SERVO_H
 
 #include <Arduino.h>
+
+#if defined(TEENSYDUINO)
+#include <PWMServo.h>
+#elif defined(ESP32)
+#include <ESP32Servo.h>
+#else
 #include <Servo.h>
+#endif
 
 class SimplexServo {
 public:
@@ -30,24 +37,20 @@ public:
     // Initialize servo with pin and optional min/max pulse widths
     void attach(int pin, int min, int max) {
         _pin = pin;
-        #if defined(ESP32) || defined(ESP8266)
-            _servo.attach(pin);  // ESP32 version often ignores min/max
-        #else
-            _servo.attach(pin, min, max);  // Standard Arduino version
-        #endif
+        _servo.attach(pin, min, max);
     }
     
     // Write angle to servo (handles cross-platform differences)
     void write(int angle) {
-        #if defined(ESP32) || defined(ESP8266)
-            _servo.write(_pin, angle);  // ESP32 version needs pin
-        #else
-            _servo.write(angle);  // Standard Arduino version
-        #endif
+        _servo.write(angle);
     }
     
 private:
-    Servo _servo;
+    #if defined(TEENSYDUINO)
+        PWMServo _servo;
+    #else
+        Servo _servo;
+    #endif
     int _pin;
 };
 

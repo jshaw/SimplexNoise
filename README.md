@@ -1,13 +1,14 @@
-# SimplexNoise Library for Arduino - v0.2.0
+# SimplexNoise Library for Arduino - v0.2.1
 
-An improved implementation of the SimplexNoise algorithm for Arduino and ESP32 platforms. Generate smooth, organic motion patterns for servos, LEDs, and other physical outputs.
+An improved implementation of the SimplexNoise algorithm for Arduino-compatible boards. Generate smooth, organic motion patterns for servos, LEDs, and other physical outputs.
 
-## What's New in v0.2.0
+## What's New in v0.2.1
 
 - **Memory optimization**: Uses PROGMEM for constant data to save RAM
 - **Seeding capability**: Generate unique noise patterns with custom seeds
 - **Enhanced functionality**: Added scaling and multi-layered noise functions
-- **Cross-platform support**: Works on both Arduino and ESP32
+- **Cross-platform support**: Tested with Arduino AVR, ESP32, and Teensy cores
+- **Library Manager readiness**: Adds dependency metadata and CI checks for Arduino, ESP32, and Teensy builds
 
 ## Features
 
@@ -16,7 +17,7 @@ An improved implementation of the SimplexNoise algorithm for Arduino and ESP32 p
 - **True randomness**: Proper seeding mechanism for unique patterns
 - **Direct scaling**: Methods to map noise directly to desired output ranges
 - **Fractal Brownian Motion**: Multi-layered noise for more natural patterns
-- **Cross-platform servo control**: Works on both Arduino and ESP32
+- **Cross-platform servo control**: Works with Arduino Servo-compatible boards and ESP32 via ESP32Servo
 
 ## Installation
 
@@ -24,10 +25,16 @@ An improved implementation of the SimplexNoise algorithm for Arduino and ESP32 p
 2. In Arduino IDE: Sketch -> Include Library -> Add .ZIP Library
 3. Select the downloaded ZIP file
 
+When installed from Arduino Library Manager, the required servo dependencies are installed automatically:
+
+- `Servo` for Arduino AVR and other Servo-compatible cores
+- `ESP32Servo` for ESP32 boards
+- `PWMServo` for Teensy boards
+
 ## Basic Usage
 
 ```cpp
-#include 
+#include <SimplexNoise.h>
 
 void setup() {
   Serial.begin(115200);
@@ -54,8 +61,8 @@ void loop() {
 For cross-platform servo control, use the included SimplexServo helper:
 
 ```cpp
-#include 
-#include 
+#include <SimplexServo.h>
+#include <SimplexNoise.h>
 
 SimplexServo servo;
 
@@ -63,7 +70,7 @@ void setup() {
   // Initialize noise
   SimplexNoise::init();
   
-  // Attach servo (works on both Arduino and ESP32)
+  // Attach servo (works on Arduino AVR, ESP32, and Teensy)
   servo.attach(9);
 }
 
@@ -83,8 +90,8 @@ void loop() {
 For more natural, complex motion patterns:
 
 ```cpp
-#include 
-#include 
+#include <SimplexServo.h>
+#include <SimplexNoise.h>
 
 SimplexServo servo;
 
@@ -129,5 +136,20 @@ Arduino port by Jordan Shaw.
 
 This code is in the public domain, following the original SimplexNoise implementation by Stefan Gustavson.
 
-## V1 Video documenation 
+## Arduino Library Manager Release Checklist
+
+1. Run `arduino-lint --compliance strict`.
+2. Compile the examples for at least Arduino AVR, ESP32, and Teensy.
+3. Update `version` in `library.properties` and README.
+4. Create and push a Git tag that matches the version, for example `0.2.1`.
+5. Submit or update the library in the Arduino Library Manager registry.
+
+## V1 Video documentation
 Video for servo example that currently uses a ESP8266: https://www.youtube.com/watch?v=SjVWmJZx0kk
+
+## Studio Jordan Shaw
+
+SimplexNoise is maintained by Studio Jordan Shaw.
+
+- Website: https://jordanshaw.com
+- Project context: built for creative hardware, motion, and generative interface work, including use in and with https://datanet.art

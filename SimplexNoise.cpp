@@ -17,7 +17,7 @@ This is a speed-improved simplex noise algorithm for 2D. The original
 code could be speeded up even further, but this version balances
 performance with flexibility and ease of use.
 
-Version 0.2.0
+Version 0.2.1
 
 The original Java code was placed in the public domain by its original author,
 Stefan Gustavson. You may use it as you see fit, but attribution is appreciated.
