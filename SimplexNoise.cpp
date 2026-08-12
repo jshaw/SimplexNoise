@@ -4,7 +4,7 @@ Modernized SimplexNoise algorithm for Arduino
 
 Originally ported to a reusable Arduino Library
 By Jordan Shaw / http://jordanshaw.com / 2017-02
-Updated with memory optimization and enhanced features (2025)
+Updated with seeding, scaling and fractal noise (2025)
 
 Development History:
 - Original Java implementation by Stefan Gustavson (stegu@itn.liu.se)
@@ -17,10 +17,11 @@ This is a speed-improved simplex noise algorithm for 2D. The original
 code could be speeded up even further, but this version balances
 performance with flexibility and ease of use.
 
-Version 0.2.1
+Version 0.3.0
 
+This Arduino library is released under the MIT License; see LICENSE.
 The original Java code was placed in the public domain by its original author,
-Stefan Gustavson. You may use it as you see fit, but attribution is appreciated.
+Stefan Gustavson. Attribution is appreciated.
 
 Original gist url: https://gist.github.com/Slipyx/2372043
 ===============================================================================
@@ -67,8 +68,11 @@ bool SimplexNoise::initialized = false;
 
 // Initialize permutation arrays with default seed
 void SimplexNoise::init() {
-    // Use millis as seed for some randomness
-    init(millis());
+    // Convenience default only. Very early in a sketch these timers have
+    // barely advanced, so this carries almost no entropy and will often
+    // produce the same pattern on every boot. For genuinely distinct
+    // patterns, seed explicitly, e.g. SimplexNoise::init(analogRead(A0)).
+    init(millis() ^ micros());
 }
 
 // Initialize with custom seed
@@ -77,35 +81,44 @@ void SimplexNoise::init(uint32_t seed) {
     initialized = true;
 }
 
-// Regenerate with new seed
+// Regenerate with new seed.
+// Marks the generator as initialized so that a reseed() issued before the
+// first noise() call is not discarded by the lazy init in noise().
 void SimplexNoise::reseed(uint32_t seed) {
     generatePerm(seed);
+    initialized = true;
 }
 
-// Generate permutation arrays from seed
+// Generate permutation arrays from seed.
+//
+// Uses a private xorshift32 generator rather than the Arduino random()
+// functions. This keeps a given seed reproducible across platforms (AVR,
+// ESP32 and Teensy do not share a PRNG implementation), accepts a seed of 0
+// (randomSeed() ignores it), and leaves the sketch's own random() state alone.
 void SimplexNoise::generatePerm(uint32_t seed) {
-    // Create a copy of the original permutation table
-    uint8_t shuffledP[256];
-    
-    // Read from PROGMEM
-    for (int i = 0; i < 256; i++) {
-        shuffledP[i] = pgm_read_byte(&p[i]);
+    // xorshift32 cannot escape a zero state; remap 0 to an arbitrary constant.
+    uint32_t state = (seed != 0) ? seed : 0x9E3779B9UL;
+
+    // Load the reference table from PROGMEM into the low half of perm[] and
+    // shuffle it in place, avoiding a separate 256-byte working buffer.
+    for (uint16_t i = 0; i < 256; ++i) {
+        perm[i] = pgm_read_byte(&p[i]);
     }
-    
-    // Seed the random number generator
-    randomSeed(seed);
-    
+
     // Fisher-Yates shuffle to randomize the permutation table
-    for (int i = 255; i > 0; i--) {
-        int j = random(i + 1);
-        uint8_t temp = shuffledP[i];
-        shuffledP[i] = shuffledP[j];
-        shuffledP[j] = temp;
+    for (uint16_t i = 255; i > 0; --i) {
+        state ^= state << 13;
+        state ^= state >> 17;
+        state ^= state << 5;
+        uint16_t j = static_cast<uint16_t>(state % (i + 1));
+        uint8_t temp = perm[i];
+        perm[i] = perm[j];
+        perm[j] = temp;
     }
-    
-    // Fill the expanded permutation tables
+
+    // Mirror into the upper half and build the mod-12 lookup
     for (uint16_t i = 0; i < 512; ++i) {
-        perm[i] = shuffledP[i & 255];
+        perm[i] = perm[i & 255];
         permMod12[i] = static_cast<uint8_t>(perm[i] % 12);
     }
 }
@@ -189,6 +202,12 @@ double SimplexNoise::scaledNoise(double xin, double yin, double min, double max)
 
 // Fractal Brownian Motion (layered noise)
 double SimplexNoise::fbm(double x, double y, int octaves, double persistence) {
+    // A non-positive octave count would leave maxValue at 0 and return NaN,
+    // which callers then feed straight into servo.write() or analogWrite().
+    if (octaves < 1) {
+        octaves = 1;
+    }
+
     double total = 0.0;
     double frequency = 1.0;
     double amplitude = 1.0;

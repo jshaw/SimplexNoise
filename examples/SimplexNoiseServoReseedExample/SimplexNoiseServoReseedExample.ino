@@ -43,7 +43,7 @@ void setup() {
   // Initialize noise generator
   SimplexNoise::init(random(100000));
   
-  Serial.println("SimplexNoise Servo Controller v0.2");
+  Serial.println("SimplexNoise Servo Controller v0.3.0");
   Serial.println("----------------------------");
   Serial.println("Servo pin: " + String(servoPin));
   Serial.println("Interval: " + String(interval) + "ms");

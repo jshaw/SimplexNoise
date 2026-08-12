@@ -21,7 +21,7 @@ void setup() {
   
   SimplexNoise::init(random(100000));
   
-  Serial.println("SimplexNoise Basic Example v0.2");
+  Serial.println("SimplexNoise Basic Example v0.3.0");
   Serial.println("----------------------------");
 }
 

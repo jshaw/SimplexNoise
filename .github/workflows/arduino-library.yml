@@ -37,11 +37,14 @@ jobs:
           arduino-cli core install arduino:avr
           arduino-cli core install esp32:esp32
           arduino-cli core install teensy:avr
-      - name: Install dependencies
+      - name: Install servo libraries for the optional SimplexServo helper
+        # The core noise API has no dependencies; these are only needed to
+        # build the servo examples. PWMServo is deliberately not installed:
+        # the Teensy core bundles it, and a Library Manager copy would shadow
+        # the bundled one rather than testing what Teensy users actually get.
         run: |
           arduino-cli lib install Servo
           arduino-cli lib install ESP32Servo
-          arduino-cli lib install PWMServo
       - name: Compile examples
         run: |
           for sketch in examples/*/*.ino; do
