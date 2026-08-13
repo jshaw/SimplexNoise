@@ -1,7 +1,11 @@
 name: Arduino Library
 
 on:
+  # Restricted to master so that a pull request does not run the whole matrix
+  # twice (once for push, once for pull_request).
   push:
+    branches: [master]
+    tags: ['*']
   pull_request:
   workflow_dispatch:
 
@@ -32,11 +36,24 @@ jobs:
           arduino-cli config add board_manager.additional_urls https://raw.githubusercontent.com/espressif/arduino-esp32/gh-pages/package_esp32_index.json
           arduino-cli config add board_manager.additional_urls https://www.pjrc.com/teensy/package_teensy_index.json
       - name: Install cores
+        # These pull large toolchains from third-party release hosts, which
+        # time out intermittently (the ESP32 xtensa toolchain especially).
+        # Retry before failing so transient network errors don't red-flag a PR.
         run: |
           arduino-cli core update-index
-          arduino-cli core install arduino:avr
-          arduino-cli core install esp32:esp32
-          arduino-cli core install teensy:avr
+          for core in arduino:avr esp32:esp32 teensy:avr; do
+            for attempt in 1 2 3; do
+              if arduino-cli core install "$core"; then
+                break
+              fi
+              if [ "$attempt" -eq 3 ]; then
+                echo "::error::Failed to install core $core after 3 attempts"
+                exit 1
+              fi
+              echo "Install of $core failed (attempt $attempt/3), retrying in 15s..."
+              sleep 15
+            done
+          done
       - name: Install servo libraries for the optional SimplexServo helper
         # The core noise API has no dependencies; these are only needed to
         # build the servo examples. PWMServo is deliberately not installed:
