@@ -8,7 +8,6 @@
 
 SimplexNoise	KEYWORD1
 SimplexServo	KEYWORD1
-Grad	KEYWORD1
 
 #######################################
 # Methods and Functions (KEYWORD2)
@@ -20,15 +19,5 @@ noise	KEYWORD2
 scaledNoise	KEYWORD2
 fbm	KEYWORD2
 scaledFbm	KEYWORD2
-mapNoise	KEYWORD2
-fastFloor	KEYWORD2
-dot	KEYWORD2
 attach	KEYWORD2
 write	KEYWORD2
-
-#######################################
-# Constants (LITERAL1)
-#######################################
-
-F2	LITERAL1
-G2	LITERAL1

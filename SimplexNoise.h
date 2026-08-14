@@ -4,7 +4,7 @@ Modernized SimplexNoise algorithm for Arduino
 
 Originally ported to a reusable Arduino Library
 By Jordan Shaw / http://jordanshaw.com / 2017-02
-Updated with memory optimization and enhanced features (2025)
+Updated with seeding, scaling and fractal noise (2025)
 
 Development History:
 - Original Java implementation by Stefan Gustavson (stegu@itn.liu.se)
@@ -17,10 +17,11 @@ This is a speed-improved simplex noise algorithm for 2D. The original
 code could be speeded up even further, but this version balances
 performance with flexibility and ease of use.
 
-Version 0.2.1
+Version 0.3.0
 
+This Arduino library is released under the MIT License; see LICENSE.
 The original Java code was placed in the public domain by its original author,
-Stefan Gustavson. You may use it as you see fit, but attribution is appreciated.
+Stefan Gustavson. Attribution is appreciated.
 
 Original gist url: https://gist.github.com/Slipyx/2372043
 ===============================================================================
@@ -41,22 +42,23 @@ public:
 
 class SimplexNoise {
 public:
-    // Initialize permutation arrays (uses default seed)
+    // Initialize permutation arrays using a weak time-based seed.
+    // Prefer init(seed) with a real entropy source; see SimplexNoise.cpp.
     static void init();
-    
-    // Initialize with custom seed
+
+    // Initialize with custom seed. Any seed value is accepted, including 0.
     static void init(uint32_t seed);
-    
-    // Regenerate permutation with a new seed
+
+    // Regenerate permutation with a new seed. Safe to call before init().
     static void reseed(uint32_t seed);
-    
+
     // 2D simplex noise - returns value in range [-1,1]
     static double noise(double xin, double yin);
-    
+
     // Scaled 2D simplex noise - returns value between min and max
     static double scaledNoise(double xin, double yin, double min, double max);
-    
-    // Get layered noise (fractal Brownian motion)
+
+    // Get layered noise (fractal Brownian motion). octaves is clamped to >= 1.
     static double fbm(double x, double y, int octaves = 3, double persistence = 0.5);
     
     // Get scaled layered noise
