@@ -1,10 +1,10 @@
 name: Arduino Library
 
 on:
-  # Restricted to master so that a pull request does not run the whole matrix
+  # Restricted to main so that a pull request does not run the whole matrix
   # twice (once for push, once for pull_request).
   push:
-    branches: [master]
+    branches: [main]
     tags: ['*']
   pull_request:
   workflow_dispatch:
